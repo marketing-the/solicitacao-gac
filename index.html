@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal do Solicitante — Marketing THE · GAC</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans',sans-serif;background:#f0f4f8;color:#0d2137;padding:32px 16px 60px;min-height:100vh}
+.wrap{max-width:560px;margin:0 auto}
+.header{text-align:center;margin-bottom:28px}
+.badge{display:inline-block;background:#1a3a6b;color:#fff;font-size:11px;font-weight:700;letter-spacing:.1em;padding:4px 14px;border-radius:4px;margin-bottom:12px;text-transform:uppercase}
+h1{font-size:22px;font-weight:700;margin-bottom:4px}
+.sub{font-size:12px;color:#5a7da0}
+.conn{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#5a7da0;background:#fff;border:1px solid #d0dce8;border-radius:20px;padding:4px 12px;margin-top:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:#f59e0b}
+.dot.ok{background:#22c55e}
+.card{background:#fff;border:1px solid #d0dce8;border-radius:10px;padding:24px;margin-bottom:16px}
+.label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5a7da0;display:block;margin-bottom:6px}
+input,textarea,select{width:100%;background:#f8fafc;border:1px solid #d0dce8;border-radius:8px;padding:9px 12px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#0d2137;outline:none}
+input:focus,textarea:focus{border-color:#1a3a6b}
+textarea{resize:vertical;min-height:72px}
+.group{margin-bottom:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.artes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.arte{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #d0dce8;border-radius:8px;padding:10px 12px;cursor:pointer;font-size:13px;transition:all .15s}
+.arte:has(input:checked){border-color:#1a3a6b;background:#eef3fb;color:#1a3a6b;font-weight:500}
+.arte input{width:15px;height:15px;accent-color:#1a3a6b;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#1a3a6b;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:700;padding:12px 24px;border-radius:8px;border:none;cursor:pointer;width:100%;transition:background .15s}
+.btn:hover{background:#1e5a94}
+.btn:disabled{background:#9ab;cursor:not-allowed}
+.btn-sec{background:#fff;color:#2c5282;border:1px solid #d0dce8;font-weight:500;font-size:13px;padding:7px 14px;width:auto}
+.btn-sec:hover{border-color:#1a3a6b}
+.result{background:#fff;border:2px solid #1a3a6b;border-radius:10px;padding:24px;margin-top:16px;text-align:center;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.dem-id{font-size:32px;font-weight:700;font-family:monospace;color:#1a3a6b;background:#eef3fb;border:2px solid #1a3a6b;border-radius:8px;padding:10px 24px;display:inline-block;margin:10px 0}
+.pfield{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e8eef5;font-size:13px}
+.pfield:last-child{border:none}
+.pl{color:#5a7da0}
+.pv{font-weight:500;text-align:right;max-width:60%}
+.dem-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border:1px solid #d0dce8;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:border-color .15s;font-size:12px}
+.dem-row:hover{border-color:#1a3a6b}
+.dem-id-sm{font-family:monospace;font-weight:700;color:#1a3a6b;min-width:85px}
+.badge-s{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;white-space:nowrap}
+.s-rec{background:#dbeafe;color:#1e40af}
+.s-env{background:#dcfce7;color:#166534}
+.s-rev{background:#fef3c7;color:#92400e}
+.s-apr{background:#ede9fe;color:#5b21b6}
+.s-alt{background:#ffedd5;color:#c2410c}
+.s-dup{background:#f1f5f9;color:#475569}
+.err{color:#c0392b;font-size:12px;margin-top:6px;display:none}
+.toast{position:fixed;bottom:24px;right:24px;background:#fff;border:1px solid #d0dce8;border-radius:8px;padding:12px 18px;font-size:13px;z-index:999;transform:translateY(80px);opacity:0;transition:all .25s;display:flex;align-items:center;gap:8px}
+.toast.show{transform:translateY(0);opacity:1}
+#login-section{}
+#main-section{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="badge">GAC · Portal do Solicitante</div>
+    <h1>Controle Marketing THE</h1>
+    <p class="sub" style="color:#1a3a6b;font-weight:600;font-size:11px;margin-bottom:2px">GRUPO ADRIANO COBUCCIO</p>
+    <p class="sub">Solicite artes e acompanhe suas demandas em tempo real</p>
+    <div class="conn"><span class="dot" id="dot"></span><span id="conn-txt">Conectando...</span></div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="login-section" class="card">
+    <span class="label">Identificação</span>
+    <p style="font-size:13px;color:#5a7da0;margin-bottom:12px">Informe seu nome ou setor para entrar.</p>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="login-input" placeholder="Ex: João Silva ou Comercial GAC" onkeydown="if(event.key==='Enter')login()">
+      <button class="btn btn-sec" onclick="login()">Entrar →</button>
+    </div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e8eef5">
+      <span class="label">Consultar sem entrar:</span>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <input type="text" id="quick-inp" placeholder="Código DEM-0001, PDV ou nº afinidade" onkeydown="if(event.key==='Enter')quickSearch()">
+        <button class="btn btn-sec" onclick="quickSearch()">🔍</button>
+      </div>
+      <div id="quick-res" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- ÁREA LOGADA -->
+  <div id="main-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #d0dce8;border-radius:8px;padding:10px 14px;margin-bottom:14px">
+      <span style="font-size:13px;color:#2c5282">👤 <strong id="user-name" style="color:#1a3a6b"></strong></span>
+      <button class="btn btn-sec" onclick="logout()" style="padding:4px 10px;font-size:11px">Trocar</button>
+    </div>
+
+    <!-- NOVA SOLICITAÇÃO -->
+    <div class="card">
+      <div style="font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px"><span style="background:#1a3a6b;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px">+</span>Nova Solicitação</div>
+
+      <div class="group">
+        <span class="label">Tipo de Arte <span style="color:#c0392b">*</span></span>
+        <div class="artes">
+          <label class="arte"><input type="checkbox" name="arte" value="WhatsApp"> 📱 WhatsApp</label>
+          <label class="arte"><input type="checkbox" name="arte" value="Feed"> 🖼 Feed</label>
+          <label class="arte"><input type="checkbox" name="arte" value="Stories"> 📲 Stories</label>
+          <label class="arte"><input type="checkbox" name="arte" value="Vídeo"> 🎬 Vídeo</label>
+          <label class="arte"><input type="checkbox" name="arte" value="Apresentação"> 📊 Apresentação</label>
+          <label class="arte"><input type="checkbox" name="arte" value="Outro"> ✏ Outro</label>
+        </div>
+      </div>
+
+      <div class="group">
+        <span class="label">Setor / Origem <span style="color:#c0392b">*</span></span>
+        <input type="text" id="setor" placeholder="Ex: Comercial, RH, Diretoria...">
+      </div>
+
+      <div class="row2">
+        <div><span class="label">PDV</span><input type="text" id="pdv" placeholder="Nome da loja..."></div>
+        <div><span class="label">Nº Afinidade</span><input type="text" id="afin" placeholder="Código..."></div>
+      </div>
+
+      <div class="group">
+        <span class="label">Descrição / Briefing <span style="color:#c0392b">*</span></span>
+        <textarea id="desc" rows="3" placeholder="Descreva o que precisa: texto, cor, referências..."></textarea>
+      </div>
+
+      <div class="group">
+        <span class="label">Anexos <span style="font-weight:400;text-transform:none;font-size:11px;color:#5a7da0">(opcional — selecione vários de uma vez)</span></span>
+        <label id="drop-area" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:#f8fafc;border:2px dashed #d0dce8;border-radius:8px;padding:20px;cursor:pointer;transition:all .15s;margin-top:6px" onmouseover="this.style.borderColor='#1a3a6b'" onmouseout="this.style.borderColor='#d0dce8'">
+          <span style="font-size:28px">📎</span>
+          <span style="font-size:13px;color:#2c5282;font-weight:500">Clique para selecionar arquivos</span>
+          <span style="font-size:11px;color:#5a7da0">Imagens, PDF, vídeo — até 5 arquivos de uma vez</span>
+          <input type="file" id="multi-file" multiple accept="image/*,.pdf,.mp4,.mov,.webm,.zip,.ai,.psd" style="display:none" onchange="showFiles(this.files)">
+        </label>
+        <div id="file-list" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+
+      <div class="group">
+        <span class="label">Observações</span>
+        <textarea id="obs" rows="2" placeholder="Urgência, prazo desejado..."></textarea>
+      </div>
+
+      <div id="form-err" class="err">Preencha os campos obrigatórios.</div>
+      <button class="btn" id="submit-btn" onclick="enviar()">Enviar Solicitação →</button>
+      <div id="submit-res"></div>
+    </div>
+
+    <!-- MINHAS SOLICITAÇÕES -->
+    <div class="card">
+      <span class="label">Minhas Solicitações</span>
+      <div id="my-list"></div>
+    </div>
+
+    <!-- CONSULTAR -->
+    <div class="card">
+      <span class="label">Consultar</span>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="srch" placeholder="DEM-0001, PDV ou nº afinidade" onkeydown="if(event.key==='Enter')buscar()">
+        <button class="btn btn-sec" onclick="buscar()">🔍 Buscar</button>
+      </div>
+      <div id="srch-res" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL = "https://cirbxpkjouymljlbujek.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNpcmJ4cGtqb3V5bWxqbGJ1amVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMTE2NjksImV4cCI6MjA5MjU4NzY2OX0.XlQYpQO9wjrS-6IDlcdKP-s6iJIBZzyUX_b8JvxTmaA";
+
+const sb = supabase.createClient(SB_URL, SB_KEY);
+let user = null;
+let allDemands = [];
+
+// Conectar e carregar
+sb.from('demands').select('id').limit(1).then(({error}) => {
+  const dot = document.getElementById('dot');
+  const txt = document.getElementById('conn-txt');
+  dot.classList.add('ok');
+  txt.textContent = 'Conectado';
+});
+
+// Realtime
+sb.channel('portal').on('postgres_changes',{event:'*',schema:'public',table:'demands'},()=>{
+  loadDemands();
+}).subscribe();
+
+async function loadDemands(){
+  const {data} = await sb.from('demands').select('*');
+  if(data) allDemands = data;
+  renderMyList();
+}
+
+// Utils
+function pad(n){return String(n).padStart(2,'0')}
+function today(){const d=new Date();return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function fmt(iso){if(!iso)return '—';const[y,m,d]=iso.split('-');return `${d}/${m}/${y}`}
+function addDias(iso,n){const d=new Date(iso+'T12:00:00');let c=0;while(c<n){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)c++;}return d.toISOString().slice(0,10)}
+function sCls(s){const m={'Recebida':'s-rec','Enviada':'s-env','Em revisão':'s-rev','Aprovação':'s-apr','Alteração':'s-alt','Duplicada':'s-dup'};return m[s]||'s-rec'}
+
+let toastT;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),3000)}
+
+// Login
+function login(){
+  const n=document.getElementById('login-input').value.trim();
+  if(!n){toast('Informe seu nome');return}
+  user=n;
+  document.getElementById('login-section').style.display='none';
+  document.getElementById('main-section').style.display='block';
+  document.getElementById('user-name').textContent=n;
+  loadDemands();
+}
+function logout(){
+  user=null;
+  document.getElementById('login-section').style.display='block';
+  document.getElementById('main-section').style.display='none';
+  document.getElementById('login-input').value='';
+}
+
+// Render my list
+function renderMyList(){
+  if(!user)return;
+  const mine=allDemands.filter(d=>d.solicitante&&d.solicitante.toLowerCase()===user.toLowerCase());
+  const el=document.getElementById('my-list');
+  if(!mine.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#5a7da0;font-size:13px">Nenhuma solicitação ainda.</div>';return}
+  const sorted=[...mine].sort((a,b)=>b.dataEntrada.localeCompare(a.dataEntrada));
+  el.innerHTML=sorted.map(d=>`<div class="dem-row">
+    <span class="dem-id-sm">${d.id}</span>
+    <div style="flex:1;min-width:0">
+      <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#2c5282">${(d.tiposArte||[]).join(' · ')||d.tipo||'—'}</div>
+      <div style="font-size:11px;color:#5a7da0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${(d.descricao||'').replace(/^\[.*?\]\s*/,'').slice(0,50)}</div>
+    </div>
+    <span class="badge-s ${sCls(d.status)}">${d.status}</span>
+    <span style="font-size:11px;color:#5a7da0;white-space:nowrap">${fmt(d.dataEntrada)}</span>
+  </div>`).join('');
+}
+
+// Enviar
+async function enviar(){
+  const artes=[...document.querySelectorAll('input[name="arte"]:checked')].map(c=>c.value);
+  const setor=document.getElementById('setor').value.trim();
+  const desc=document.getElementById('desc').value.trim();
+  const obs=document.getElementById('obs').value.trim();
+  const pdv=document.getElementById('pdv').value.trim();
+  const afin=document.getElementById('afin').value.trim();
+  const errEl=document.getElementById('form-err');
+
+  if(!artes.length||!setor||!desc){errEl.style.display='block';return}
+  errEl.style.display='none';
+
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='Enviando...';
+
+  // Gerar ID
+  const {data:ids}=await sb.from('demands').select('id').order('id',{ascending:false}).limit(1);
+  let nextNum=1;
+  if(ids&&ids.length>0){
+    const last=parseInt(ids[0].id.replace('DEM-',''))||0;
+    nextNum=last+1;
+  }
+  const id=`DEM-${String(nextNum).padStart(4,'0')}`;
+  const prazo=addDias(today(),5);
+
+  // Upload múltiplos arquivos
+  const anexos=[];
+  const fileInput=document.getElementById('multi-file');
+  const files=Array.from(fileInput.files||[]);
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    const ext=f.name.split('.').pop();
+    const path=`${id}/anexo_${i}_${Date.now()}.${ext}`;
+    const {error:upErr}=await sb.storage.from('arquivos').upload(path,f,{upsert:true});
+    if(!upErr){
+      const {data:urlD}=sb.storage.from('arquivos').getPublicUrl(path);
+      anexos.push({name:f.name,size:f.size,type:f.type,url:urlD.publicUrl,path});
+    } else {
+      anexos.push({name:f.name,size:f.size,type:f.type});
+    }
+  }
+
+  const demand={
+    id, dataEntrada:today(), prazo, dataSaida:'',
+    solicitante:user, tipo:setor, tiposArte:artes,
+    descricao:`[${artes.join(', ')}] ${desc}`,
+    responsavel:'', status:'Recebida', pecas:artes.length,
+    versaoFinal:'', arquivo:anexos[0]||null, anexos, obs, pdv, afinidade:afin
+  };
+
+  const {error}=await sb.from('demands').insert(demand);
+  btn.disabled=false;btn.textContent='Enviar Solicitação →';
+
+  if(error){
+    console.error('Erro ao salvar:',error);
+    toast('Erro ao enviar. Tente novamente.');
+    return;
+  }
+
+  // Limpar form
+  document.querySelectorAll('input[name="arte"]').forEach(c=>c.checked=false);
+  document.getElementById('setor').value='';
+  document.getElementById('desc').value='';
+  document.getElementById('obs').value='';
+  document.getElementById('pdv').value='';
+  document.getElementById('afin').value='';
+  document.getElementById('multi-file').value='';
+  document.getElementById('file-list').innerHTML='';
+
+  // Mostrar resultado
+  allDemands=[...allDemands,demand];
+  renderMyList();
+  const el=document.getElementById('submit-res');
+  el.innerHTML=`<div class="result">
+    <div style="font-size:12px;color:#22c55e;font-weight:700;text-transform:uppercase;letter-spacing:.08em">✓ Solicitação registrada!</div>
+    <div class="dem-id">${id}</div>
+    <div style="font-size:12px;color:#5a7da0;margin-bottom:16px">Guarde este código para acompanhar</div>
+    <div class="pfield"><span class="pl">Setor</span><span class="pv">${setor}</span></div>
+    ${pdv?`<div class="pfield"><span class="pl">PDV</span><span class="pv">${pdv}</span></div>`:''}
+    ${afin?`<div class="pfield"><span class="pl">Nº Afinidade</span><span class="pv" style="color:#6a3d9a;font-weight:700">${afin}</span></div>`:''}
+    <div class="pfield"><span class="pl">Tipo</span><span class="pv">${artes.join(' · ')}</span></div>
+    <div class="pfield"><span class="pl">Prazo estimado</span><span class="pv">${fmt(prazo)}</span></div>
+    <div class="pfield" style="border:none"><span class="pl">Status</span><span class="pv" style="color:#1e40af;font-weight:700">● Recebida</span></div>
+  </div>`;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  toast(`Solicitação ${id} enviada com sucesso!`);
+}
+
+// Buscar
+function buildCard(d){
+  const sc=sCls(d.status);
+  const tipos=(d.tiposArte||[]).join(' · ')||d.tipo||'—';
+  return `<div class="result" style="margin-bottom:10px;text-align:left">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div><div style="font-size:20px;font-weight:700;font-family:monospace;color:#1a3a6b">${d.id}</div><div style="font-size:12px;color:#5a7da0">${tipos}</div></div>
+      <span class="badge-s ${sc}" style="font-size:12px;padding:5px 12px">${d.status}</span>
+    </div>
+    <div class="pfield"><span class="pl">Solicitante</span><span class="pv">${d.solicitante||'—'}</span></div>
+    ${d.pdv?`<div class="pfield"><span class="pl">PDV</span><span class="pv">${d.pdv}</span></div>`:''}
+    ${d.afinidade?`<div class="pfield"><span class="pl">Nº Afinidade</span><span class="pv" style="color:#6a3d9a;font-weight:700">${d.afinidade}</span></div>`:''}
+    <div class="pfield"><span class="pl">Entrada</span><span class="pv">${fmt(d.dataEntrada)}</span></div>
+    <div class="pfield"><span class="pl">Prazo</span><span class="pv">${fmt(d.prazo)}</span></div>
+    ${d.dataSaida?`<div class="pfield"><span class="pl">Entregue em</span><span class="pv" style="color:#22c55e">✓ ${fmt(d.dataSaida)}</span></div>`:''}
+    <div class="pfield" style="border:none"><span class="pl">Status</span><span class="pv" style="font-weight:700">${d.status}</span></div>
+  </div>`;
+}
+
+function search(q){
+  if(!q)return[];
+  const u=q.toUpperCase(),l=q.toLowerCase();
+  const byId=allDemands.find(d=>d.id===u);
+  if(byId)return[byId];
+  const byPdv=allDemands.filter(d=>d.pdv&&d.pdv.toLowerCase().includes(l));
+  if(byPdv.length)return byPdv;
+  return allDemands.filter(d=>d.afinidade&&d.afinidade.trim()===q.trim());
+}
+
+function buscar(){
+  const q=document.getElementById('srch').value.trim();
+  const el=document.getElementById('srch-res');
+  const res=search(q);
+  if(!res.length){el.innerHTML='<div style="color:#5a7da0;font-size:13px;text-align:center;padding:12px">Nenhum resultado encontrado.</div>';return}
+  el.innerHTML=res.map(buildCard).join('');
+}
+
+function quickSearch(){
+  const q=document.getElementById('quick-inp').value.trim();
+  const el=document.getElementById('quick-res');
+  // Need to load first
+  sb.from('demands').select('*').then(({data})=>{
+    if(data)allDemands=data;
+    const res=search(q);
+    if(!res.length){el.innerHTML='<div style="color:#5a7da0;font-size:13px">Nenhum resultado.</div>';return}
+    el.innerHTML=res.map(d=>`<div style="background:#f8fafc;border:1px solid #d0dce8;border-radius:8px;padding:10px 14px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:monospace;font-weight:700;color:#1a3a6b">${d.id}</span>
+        <span class="badge-s ${sCls(d.status)}">${d.status}</span>
+      </div>
+      ${d.pdv?`<div style="font-size:11px;color:#5a7da0;margin-top:4px">📍 ${d.pdv}</div>`:''}
+    </div>`).join('');
+  });
+}
+
+
+// ── Multi-file preview ────────────────────────────────
+function showFiles(files){
+  const list=document.getElementById('file-list');
+  list.innerHTML='';
+  const arr=Array.from(files).slice(0,5);
+  arr.forEach((f,i)=>{
+    const isImg=f.type.startsWith('image/');
+    const isVid=f.type.startsWith('video/');
+    const icon=isImg?'🖼':isVid?'🎬':'📄';
+    const size=f.size>1048576?(f.size/1048576).toFixed(1)+'MB':(f.size/1024).toFixed(0)+'KB';
+    const div=document.createElement('div');
+    div.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8fafc;border:1px solid #d0dce8;border-radius:8px;font-size:12px';
+    div.innerHTML=`<span style="font-size:16px">${icon}</span><div style="flex:1;min-width:0"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;color:#0d2137">${f.name}</div><div style="color:#5a7da0;font-size:11px">${size}</div></div>`;
+    list.appendChild(div);
+  });
+  if(files.length>5){
+    const warn=document.createElement('div');
+    warn.style.cssText='font-size:11px;color:#b7770d;padding:4px 8px';
+    warn.textContent=`Apenas os primeiros 5 arquivos serão enviados (${files.length} selecionados)`;
+    list.appendChild(warn);
+  }
+}
+
+// Load on start
+loadDemands();
+</script>
+</body>
+</html>
