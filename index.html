@@ -270,12 +270,20 @@ async function enviar(){
     const f=files[i];
     const ext=f.name.split('.').pop();
     const path=`${id}/anexo_${i}_${Date.now()}.${ext}`;
-    const {error:upErr}=await sb.storage.from('arquivos').upload(path,f,{upsert:true});
-    if(!upErr){
+    const {data:upData, error:upErr}=await sb.storage.from('arquivos').upload(path,f,{upsert:true,cacheControl:'3600'});
+    if(!upErr && upData){
       const {data:urlD}=sb.storage.from('arquivos').getPublicUrl(path);
       anexos.push({name:f.name,size:f.size,type:f.type,url:urlD.publicUrl,path});
     } else {
-      anexos.push({name:f.name,size:f.size,type:f.type});
+      console.error('Upload error:', upErr);
+      // Try to get public URL anyway in case file was uploaded before
+      const {data:urlD}=sb.storage.from('arquivos').getPublicUrl(path);
+      if(urlD && urlD.publicUrl){
+        anexos.push({name:f.name,size:f.size,type:f.type,url:urlD.publicUrl,path});
+      } else {
+        anexos.push({name:f.name,size:f.size,type:f.type,uploadError:upErr?.message});
+        toast('Aviso: arquivo "'+f.name+'" não pôde ser enviado ao servidor');
+      }
     }
   }
 
